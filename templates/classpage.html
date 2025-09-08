@@ -312,7 +312,7 @@
         <div id='Aper'><br><br></div>
         <div class="apertura" >
     <h2 style="color:green;">Apertura ({{i['apDur']/60}} hrs)</h2>
-    {{i['apAct'] | safe}}
+    {{i['apHTML'] | safe}}
             <br><br>
           <!-- ANUNCIO EN CONSTRUCCIÓN -->
           <text style="font-size:130px">
@@ -336,7 +336,7 @@
         <div class="desarrollo">
     <h2 style="color:orange;"">Desarrollo ({{i['deDur']/60}} hrs)</h2>
             
-    {{i['deAct'] | safe}}
+    {{i['deHTML'] | safe}}
           <br><br>
           <!-- ANUNCIO EN CONSTRUCCIÓN -->
           <text style="font-size:130px">
@@ -366,7 +366,7 @@
         <div class="cierre">
             <h2 style="color:#B51767;"">Cierre ({{i['ciDur']/60}} hrs)</h2>
 
-            {{i['ciAct'] | safe}}</br>
+            {{i['ciHTML'] | safe}}</br>
           
           <br>
           <!-- ANUNCIO EN CONSTRUCCIÓN -->
