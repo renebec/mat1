@@ -13,12 +13,9 @@ from weasyprint import HTML, CSS
 import pymysql
 from werkzeug.utils import secure_filename
 
-
 from database import load_pg_from_db, load_pgn_from_db,  register_user, get_db_session, insert_actividad, load_plan_from_db, insert_plan,  load_pg_from_db2
 
 from sqlalchemy import text
-
-
 
 created_at = datetime.now()
 
@@ -533,7 +530,6 @@ def handle_register_user(choice):
 
 
 
-
 @app.route("/register/alumno", methods=["GET", "POST"])
 def register_alumno():
     return handle_register_user(choice="A")
@@ -553,7 +549,6 @@ def edit_plan(plan_id):
         return "Plan not found", 404
 
     return render_template("edit_plan.html", plan=plan)
-
 
 
 
@@ -603,7 +598,6 @@ def login():
             return render_template('login.html')
 
     return render_template('login.html')
-
 
 
 
