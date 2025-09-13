@@ -14,6 +14,7 @@ import pymysql
 from werkzeug.utils import secure_filename
 
 from database import load_pg_from_db, load_pgn_from_db,  register_user, get_db_session, insert_actividad, load_plan_from_db, insert_plan,  load_pg_from_db2
+from preregistration_validator import validate_student_preregistration, mark_preregistration_as_used, validate_name_match
 
 from sqlalchemy import text
 
@@ -128,7 +129,7 @@ def enviaractividad():
             numero_control = request.form['numero_control']
             pdf_file = request.files['pdf_file']
 
-            if not pdf_file or not pdf_file.filename.endswith('.pdf'):
+            if not pdf_file or not pdf_file.filename or not pdf_file.filename.endswith('.pdf'):
                 flash("Debes subir un archivo PDF válido menor a 5MB.", "danger")
                 return redirect(request.url)
 
@@ -266,7 +267,7 @@ def plan_carga():
 
             print("📋 Datos del formulario extraídos correctamente")
 
-            if not pdf_file or not pdf_file.filename.endswith('.pdf'):
+            if not pdf_file or not pdf_file.filename or not pdf_file.filename.endswith('.pdf'):
                 flash("Debes subir un archivo PDF válido menor a 5MB.", "danger")
                 return redirect(request.url)
 
@@ -365,11 +366,9 @@ def plan_carga():
             return redirect(url_for("show_plan", id=new_plan_id))
 
         except pymysql.err.IntegrityError as e:
-            if "1062" in str(e):  # Duplicate entry error
-                with connection.cursor() as cursor:
-                    cursor.execute(update_query, data)
-                connection.commit()
-                return "Plan updated successfully"
+            print(f"❌ Error de integridad MySQL: {e}")
+            flash("Ya existe una planeación con esa clave.", "danger")
+            return redirect(url_for('plan_carga'))
 
         except pymysql.MySQLError as e:
             print("❌ Error MySQL:", e)
@@ -482,6 +481,23 @@ def handle_register_user(choice):
                 return render_template(template)
             password = bcrypt.generate_password_hash(password_raw).decode('utf-8')#secure password
 
+            # ✅ PRE-REGISTRATION VALIDATION (only for students)
+            if choice == "A":  # Student registration
+                is_valid, message, preregister_data = validate_student_preregistration(numero_control)
+                if not is_valid:
+                    flash(f"❌ Registro no autorizado: {message}", "danger")
+                    return render_template(template)
+                
+                # Optional: Validate names match pre-registration
+                names_match, name_message = validate_name_match(
+                    numero_control, nombres, apellido_paterno, apellido_materno
+                )
+                if not names_match:
+                    flash(f"❌ {name_message}", "danger")
+                    return render_template(template)
+                
+                flash(f"✅ Pre-registro validado para {nombres}", "success")
+
             db_session = get_db_session()
             created_at = datetime.now(pytz.timezone("America/Mexico_City"))
 
@@ -513,7 +529,15 @@ def handle_register_user(choice):
                 flash("Ese nombre de usuario ya está registrado. Por favor, elige otro.", "danger")
                 return render_template(template)
 
-            flash(f"Registro exitoso para {nombres}!", "success")
+            # ✅ Mark pre-registration as used (only for students)
+            if choice == "A":  # Student registration
+                if not mark_preregistration_as_used(numero_control):
+                    flash("⚠️ Registro exitoso, pero error marcando pre-registro como usado.", "warning")
+                else:
+                    flash(f"✅ Registro exitoso para {nombres}! Pre-registro marcado como usado.", "success")
+            else:
+                flash(f"✅ Registro exitoso para {nombres}!", "success")
+            
             return redirect(url_for('login'))
 
         except Exception as e:
@@ -540,15 +564,16 @@ def register_docente():
 
 
 
-@app.route("/plan/<int:plan_id>/edit", methods=["GET"])
-def edit_plan(plan_id):
-    db = get_db_session()
-    plan = db.query(Plan).filter_by(id=plan_id).first()
-
-    if not plan:
-        return "Plan not found", 404
-
-    return render_template("edit_plan.html", plan=plan)
+# Commented out due to undefined Plan model
+# @app.route("/plan/<int:plan_id>/edit", methods=["GET"])
+# def edit_plan(plan_id):
+#     db = get_db_session()
+#     plan = db.query(Plan).filter_by(id=plan_id).first()
+#
+#     if not plan:
+#         return "Plan not found", 404
+#
+#     return render_template("edit_plan.html", plan=plan)
 
 
 
