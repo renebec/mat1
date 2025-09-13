@@ -14,7 +14,7 @@ import pymysql
 from werkzeug.utils import secure_filename
 
 from database import load_pg_from_db, load_pgn_from_db,  register_user, get_db_session, insert_actividad, load_plan_from_db, insert_plan,  load_pg_from_db2
-from preregistration_validator import validate_student_preregistration, mark_preregistration_as_used, validate_name_match
+from preregistration_validator import validate_preregistration, mark_preregistration_as_used
 
 from sqlalchemy import text
 
@@ -481,22 +481,13 @@ def handle_register_user(choice):
                 return render_template(template)
             password = bcrypt.generate_password_hash(password_raw).decode('utf-8')#secure password
 
-            # ✅ PRE-REGISTRATION VALIDATION (only for students)
-            if choice == "A":  # Student registration
-                is_valid, message, preregister_data = validate_student_preregistration(numero_control)
-                if not is_valid:
-                    flash(f"❌ Registro no autorizado: {message}", "danger")
-                    return render_template(template)
-                
-                # Optional: Validate names match pre-registration
-                names_match, name_message = validate_name_match(
-                    numero_control, nombres, apellido_paterno, apellido_materno
-                )
-                if not names_match:
-                    flash(f"❌ {name_message}", "danger")
-                    return render_template(template)
-                
-                flash(f"✅ Pre-registro validado para {nombres}", "success")
+            # ✅ PRE-REGISTRATION VALIDATION (for BOTH students AND teachers)
+            is_valid, message, preregister_data = validate_preregistration(numero_control)
+            if not is_valid:
+                flash(f"❌ Registro no autorizado: {message}", "danger")
+                return render_template(template)
+            
+            flash(f"✅ Pre-registro validado para {nombres}", "success")
 
             db_session = get_db_session()
             created_at = datetime.now(pytz.timezone("America/Mexico_City"))
@@ -529,14 +520,11 @@ def handle_register_user(choice):
                 flash("Ese nombre de usuario ya está registrado. Por favor, elige otro.", "danger")
                 return render_template(template)
 
-            # ✅ Mark pre-registration as used (only for students)
-            if choice == "A":  # Student registration
-                if not mark_preregistration_as_used(numero_control):
-                    flash("⚠️ Registro exitoso, pero error marcando pre-registro como usado.", "warning")
-                else:
-                    flash(f"✅ Registro exitoso para {nombres}! Pre-registro marcado como usado.", "success")
+            # ✅ Mark pre-registration as used (for BOTH students AND teachers)
+            if not mark_preregistration_as_used(numero_control):
+                flash("⚠️ Registro exitoso, pero error marcando pre-registro como usado.", "warning")
             else:
-                flash(f"✅ Registro exitoso para {nombres}!", "success")
+                flash(f"✅ Registro exitoso para {nombres}! Pre-registro marcado como usado.", "success")
             
             return redirect(url_for('login'))
 

@@ -23,9 +23,10 @@ def get_db_connection():
         print(f"❌ Database connection error: {e}")
         return None
 
-def validate_student_preregistration(numero_control):
+def validate_preregistration(numero_control):
     """
-    Validate if student is pre-registered and not already used
+    Validate if user (student OR teacher) is pre-registered and not already used
+    Only checks numero_control - works for both students and teachers
     Returns: (is_valid: bool, message: str, data: dict or None)
     """
     try:
@@ -45,7 +46,7 @@ def validate_student_preregistration(numero_control):
         connection.close()
         
         if result:
-            return True, "Estudiante autorizado para registro", result
+            return True, "Usuario autorizado para registro", result
         else:
             # Check if already used
             connection = get_db_connection()
@@ -93,45 +94,7 @@ def mark_preregistration_as_used(numero_control):
         print(f"❌ Error marking pre-registration as used: {e}")
         return False
 
-def validate_name_match(numero_control, provided_names, provided_apellido_paterno, provided_apellido_materno):
-    """
-    Optional: Validate that provided names match pre-registration data
-    Returns: (is_match: bool, message: str)
-    """
-    try:
-        connection = get_db_connection()
-        if not connection:
-            return True, "No se pudo validar nombres"  # Allow if DB unavailable
-        
-        with connection.cursor() as cursor:
-            query = """
-                SELECT nombres, apellido_paterno, apellido_materno 
-                FROM alumnos_preregistrados 
-                WHERE numero_control = %s
-            """
-            cursor.execute(query, (numero_control,))
-            result = cursor.fetchone()
-            
-        connection.close()
-        
-        if result:
-            # Compare names (case insensitive)
-            names_match = (
-                result['nombres'].lower().strip() == provided_names.lower().strip() and
-                result['apellido_paterno'].lower().strip() == provided_apellido_paterno.lower().strip() and
-                result['apellido_materno'].lower().strip() == provided_apellido_materno.lower().strip()
-            )
-            
-            if names_match:
-                return True, "Nombres coinciden con pre-registro"
-            else:
-                return False, f"Los nombres no coinciden con el pre-registro. Registrado: {result['nombres']} {result['apellido_paterno']} {result['apellido_materno']}"
-        else:
-            return True, "No se encontraron datos para validar nombres"
-            
-    except Exception as e:
-        print(f"❌ Error validating names: {e}")
-        return True, "Error validando nombres, se permite continuar"  # Allow if error
+# REMOVED: Name validation - only numero_control is checked now
 
 def get_preregistration_stats():
     """
