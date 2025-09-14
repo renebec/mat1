@@ -3,16 +3,10 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 import pytz
-import pymysql
 
-db_connection_string = os.environ['DB_CONNECTION_STRING']
-engine = create_engine(db_connection_string,
-      connect_args={
-            "ssl": { 
-              "ca": "/etc/ssl/certs/ca-certificates.crt"
-                   }
-                  }
-            )
+# Use PostgreSQL database URL from environment
+database_url = os.environ.get('DATABASE_URL')
+engine = create_engine(database_url)
 
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -22,11 +16,7 @@ def get_db_session():
     return SessionLocal()
 
 
-def handle_choice():
-    choice = None
-    if request.method == 'POST':
-        choice = request.form.get('choice')  # 'value1' or 'value2' or None
-    return render_template('register.html', choice=choice)
+# This function was moved to app.py where Flask request context is available
 
 
 def load_pg_from_db():
@@ -80,7 +70,7 @@ def load_pgn_from_db(id):
     with engine.connect() as conn:
       result = conn.execute(
         text("SELECT * FROM mat1 WHERE id = :val"),
-        {"val":plan}
+        {"val":id}
       )
       row = result.mappings().first()  # <- dict, no tupla
       return dict(row) if row else None
@@ -210,7 +200,7 @@ def insert_plan(
         print("✅ Plan insertado correctamente")
         return result.lastrowid
 
-    except pymysql.err.IntegrityError as e:
+    except Exception as e:
         if "1062" in str(e):  # Detección de clave duplicada
             print("⚠️ Plan duplicado detectado. Actualizando...")
 
