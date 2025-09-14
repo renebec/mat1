@@ -13,12 +13,9 @@ from weasyprint import HTML, CSS
 import pymysql
 from werkzeug.utils import secure_filename
 
-
 from database import load_pg_from_db, load_pgn_from_db,  register_user, get_db_session, insert_actividad, load_plan_from_db, insert_plan,  load_pg_from_db2
 
 from sqlalchemy import text
-
-
 
 created_at = datetime.now()
 
@@ -367,9 +364,22 @@ def plan_carga():
             flash(f"Planeación {cve} de {docenteID} enviada correctamente.", "success")
             return redirect(url_for("show_plan", id=new_plan_id))
 
+        except pymysql.err.IntegrityError as e:
+            if "1062" in str(e):  # Duplicate entry error
+                with connection.cursor() as cursor:
+                    cursor.execute(update_query, data)
+                connection.commit()
+                return "Plan updated successfully"
+
+        except pymysql.MySQLError as e:
+            print("❌ Error MySQL:", e)
+            flash("Error al acceder a la base de datos.", "danger")
+            return redirect(url_for('plan_carga'))
+
+        
         except Exception as e:
             print("❌ Error during submission:", e)
-            flash(f"Ocurrió un error al procesar la planeación.", "danger")
+            flash(f"Ocurrió un error al procesar la planeación {cve}.", "danger")
             return redirect(url_for('plan_carga'))
 
     return render_template("plan_carga.html", show_form=show_form)
@@ -448,7 +458,7 @@ def handle_register_user(choice):
 
     if not template:
             flash("Tipo de usuario no válido.", "danger")
-            return redirect(url_for("hello_pm1"))
+            return redirect(url_for("home"))
     
     db_session = None  #
 
@@ -520,7 +530,6 @@ def handle_register_user(choice):
 
 
 
-
 @app.route("/register/alumno", methods=["GET", "POST"])
 def register_alumno():
     return handle_register_user(choice="A")
@@ -533,14 +542,13 @@ def register_docente():
 
 @app.route("/plan/<int:plan_id>/edit", methods=["GET"])
 def edit_plan(plan_id):
-    # This route needs to be implemented with proper database queries
-    plan = load_plan_from_db(plan_id)
-    
+    db = get_db_session()
+    plan = db.query(Plan).filter_by(id=plan_id).first()
+
     if not plan:
         return "Plan not found", 404
 
     return render_template("edit_plan.html", plan=plan)
-
 
 
 
@@ -594,7 +602,6 @@ def login():
 
 
 
-
 @app.route('/download_pdf/<int:id>')
 def download_pdf(id):
     plan = load_plan_from_db(id)
@@ -640,5 +647,5 @@ def logout():
 
 
 if __name__ == '__main__':
-    http_server = WSGIServer(('0.0.0.0', 5000), app)
+    http_server = WSGIServer(('0.0.0.0', 8080), app)
     http_server.serve_forever()
