@@ -580,11 +580,3 @@ def logout():
 if __name__ == '__main__':
     http_server = WSGIServer(('0.0.0.0', 8080), app)
     http_server.serve_forever()
-
-    
-    return redirect(url_for('login'))
-
-
-if __name__ == '__main__':
-    http_server = WSGIServer(('0.0.0.0', 8080), app)
-    http_server.serve_forever()
