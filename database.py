@@ -72,17 +72,14 @@ def load_plan_from_db(id):
       return None
 
 
-
-
-
 def load_pgn_from_db(id):
   try:
     with engine.connect() as conn:
       result = conn.execute(
         text("SELECT * FROM mat1 WHERE id = :val"),
-        {"val":plan}
+        {"val": id}
       )
-      row = result.mappings().first()  # <- dict, no tupla
+      row = result.mappings().first()
       return dict(row) if row else None
   except Exception as e:
     print(f"DB ERROR: {e}")
