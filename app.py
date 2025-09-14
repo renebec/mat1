@@ -13,7 +13,7 @@ from weasyprint import HTML, CSS
 import pymysql
 from werkzeug.utils import secure_filename
 
-from database import load_pg_from_db, load_pgn_from_db,  register_user, get_db_session, insert_actividad, load_plan_from_db, insert_plan,  load_pg_from_db2
+from database import load_pg_from_db, load_pgn_from_db,  register_user, get_db_session, insert_actividad, load_plan_from_db, insert_plan,  load_pg_from_db2, is_preregistered
 
 from sqlalchemy import text
 
@@ -475,6 +475,12 @@ def handle_register_user(choice):
             semestre = request.form.get('semestre', '').strip()
             grupo = request.form.get('grupo', '').strip()
 
+
+            if not is_preregistered(numero_control):
+                flash("Número de control no está preregistrado; no se puede registrar.", "danger")
+                return render_template(template)
+
+            
             # Simple validation
             password_raw = request.form.get('password', '') #secure validation
             if len(password_raw) < 8: #
