@@ -476,6 +476,18 @@ def handle_register_user(choice):
             grupo = request.form.get('grupo', '').strip()
 
 
+            # Format check: validate user type based on numero_control
+            is_teacher_form = (choice == "D")
+            fourth_char = numero_control[3] if len(numero_control) >= 4 else None
+
+            if is_teacher_form and (not fourth_char or not fourth_char.isalpha()):
+                flash("El número de control no corresponde a un docente (debe tener letra como cuarto carácter).", "danger")
+                return render_template(template)
+
+            if not is_teacher_form and fourth_char and fourth_char.isalpha():
+                flash("El número de control corresponde a un docente. Selecciona 'Docente' para registrarte.", "danger")
+                return render_template(template)
+            
             if not is_preregistered(numero_control):
                 flash("Número de control no está preregistrado; no se puede registrar.", "danger")
                 return render_template(template)
