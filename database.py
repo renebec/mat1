@@ -3,17 +3,28 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 import pytz
+# import psycopg2
+# from flask_bcrypt import generate_password_hash
+#Estructura básica Flask para registro
 
-# Use PostgreSQL database URL from environment
-database_url = os.environ.get('DATABASE_URL')
-engine = create_engine(database_url)
+from flask import Flask, request, render_template, redirect, url_for, flash
 
-Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from datetime import datetime
+import pytz
+
+# Use PostgreSQL DATABASE_URL environment variable
+db_connection_string = os.environ.get('DB_CONNECTION_STRING')
+if not db_connection_string:
+    raise ValueError("DB_CONNECTION_STRING environment variable is not set")
+
+engine = create_engine(db_connection_string)
+
+#Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 SessionLocal = sessionmaker(bind=engine)
 
 def get_db_session():
-    return SessionLocal()
+    return SessionLocal
 
 
 # This function was moved to app.py where Flask request context is available
