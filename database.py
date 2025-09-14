@@ -3,31 +3,30 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 import pytz
-# import psycopg2
-# from flask_bcrypt import generate_password_hash
-#Estructura básica Flask para registro
+import pymysql
 
-from flask import Flask, request, render_template, redirect, url_for, flash
+db_connection_string = os.environ['DB_CONNECTION_STRING']
+engine = create_engine(db_connection_string,
+      connect_args={
+            "ssl": { 
+              "ca": "/etc/ssl/certs/ca-certificates.crt"
+                   }
+                  }
+            )
 
-from datetime import datetime
-import pytz
-
-# Use PostgreSQL DATABASE_URL environment variable
-db_connection_string = os.environ.get('DB_CONNECTION_STRING')
-if not db_connection_string:
-    raise ValueError("DB_CONNECTION_STRING environment variable is not set")
-
-engine = create_engine(db_connection_string)
-
-#Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 SessionLocal = sessionmaker(bind=engine)
 
 def get_db_session():
-    return SessionLocal
+    return SessionLocal()
 
 
-# This function was moved to app.py where Flask request context is available
+def handle_choice():
+    choice = None
+    if request.method == 'POST':
+        choice = request.form.get('choice')  # 'value1' or 'value2' or None
+    return render_template('register.html', choice=choice)
 
 
 def load_pg_from_db():
@@ -81,7 +80,7 @@ def load_pgn_from_db(id):
     with engine.connect() as conn:
       result = conn.execute(
         text("SELECT * FROM mat1 WHERE id = :val"),
-        {"val":id}
+        {"val":plan}
       )
       row = result.mappings().first()  # <- dict, no tupla
       return dict(row) if row else None
@@ -211,7 +210,7 @@ def insert_plan(
         print("✅ Plan insertado correctamente")
         return result.lastrowid
 
-    except Exception as e:
+    except pymysql.err.IntegrityError as e:
         if "1062" in str(e):  # Detección de clave duplicada
             print("⚠️ Plan duplicado detectado. Actualizando...")
 
