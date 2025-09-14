@@ -111,7 +111,7 @@ def insert_actividad(session, actividad_num, apellido_paterno, apellido_materno,
     created_at = datetime.now(pytz.timezone("America/Mexico_City"))
     try:
             query = text("""
-                INSERT INTO actividades_inoc (
+                INSERT INTO actividades (
                     actividad_num,
                     apellido_paterno,
                     apellido_materno,
