@@ -62,9 +62,9 @@ def load_pg_from_db2():
     try:
       with engine.connect() as conn:
           #result = conn.execute(text("SELECT * FROM planInocAgro ORDER BY created_at DESC"))
-          result = conn.execute(text("SELECT * FROM mat1"))
-          pg = result.mappings().all()
-          return pg
+          result = conn.execute(text("SELECT * FROM contenido"))
+          pg2 = result.mappings().all()
+          return pg2
     except Exception as e:
       print(f"DB ERROR: {e}")
       return None

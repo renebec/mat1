@@ -166,7 +166,7 @@ def enviaractividad():
             # Establecer la fecha y hora actual en zona horaria de México
             created_at = datetime.now(pytz.timezone("America/Mexico_City"))
 
-            # Insertar en la tabla actividades_inoc
+            # Insertar en la tabla actividades
             insert_actividad(
                 session_db,
                 actividad_num,
