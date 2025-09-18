@@ -50,7 +50,7 @@ def hello_pm1():
             #flash('Su sesión ha expirado. Por favor, inicie sesión nuevamente.', 'danger')
             return redirect(url_for('login'))
 
-        pg = load_pg_from_db2()
+        pg = load_pg_from_db()
 
         es_profesor = flask_session.get('es_profesor', False)
         username = flask_session.get('username', 'Invitado')
