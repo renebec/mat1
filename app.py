@@ -1,6 +1,6 @@
 import pytz
 import os
-from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session, send_file, make_response
+from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session, send_file, make_response, Response
 from flask import session as flask_session
 from flask_bcrypt import Bcrypt
 from gevent import monkey; monkey.patch_all()
@@ -43,6 +43,10 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
 app.permanent_session_lifetime = timedelta(minutes=60)
 
+
+@app.route('/favicon.ico')
+def favicon():
+    return Response(status=204)  # No Content
 
 @app.route("/")
 def hello_pm1():
