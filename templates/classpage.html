@@ -271,7 +271,7 @@
             <span class="navbar-brand mb-0 h1 navtxt">
                 <div class="container-fluid row align-items-center">
                   {% if session.username %}
-                        <text class='col-9'>Planeación {{i['id']}} user: {{session.username}}</text>
+                        <text class='col-9'>Unidad {{i['id']}} user: {{session.username}}</text>
                   {% endif %}
                         <div class="col-3 text-end">
                             
@@ -290,7 +290,7 @@
         {% set tiempo = 0 %}
                 {% set tiempo = tiempo + i['apDur'] + i['deDur'] + i['ciDur'] %}
 
-        <h3>Planeación {{i['plan']}}</h3>
+        <h3>Unidad {{i['plan']}}</h3>
         {{i['prop'] | safe}}<br>
 <!-- ANUNCIO EN CONSTRUCCIÓN 
       <text style="font-size:130px">
@@ -412,7 +412,7 @@
       </div>
       </div
       <div class="parPond">
-        <h2 style="color:#B5e7A7;"">Ponderación para el parcial ({{i['parPond']}} %)</h2>
+        <h2 style="color:#B5e7A7;"">Ponderación de esta planeación en el total del parcial ({{i['parPond']}} %)</h2>
       </div>
         <br>
         <br>
