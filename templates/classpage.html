@@ -9,6 +9,23 @@
 
     <style>
 
+      .tablita {
+        border-collapse: collapse;
+        /* optional: border on all outer edges */
+
+      }
+
+      .tdi, .thi {
+        padding: 8px;
+        /* remove default side borders except where needed */
+        border: none;
+      }
+
+      /* Add a left border only for every cell in the second column */
+      .tdi:nth-child(3), .thi:nth-child(3) {
+        border-left: 1px solid black;
+      }
+
        #btnCerrar {
 
             margin-right:10px;
