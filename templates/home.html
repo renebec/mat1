@@ -203,7 +203,7 @@
                 {% endif %}
             {% endfor %}
 
-            <text class='partial-footer-total'>Total ponderado: {{ ns.total }}% </text>
+            <text class='partial-footer-total'>Total ponderado: {{ ns.total/5 }}% </text>
                 <br>
 
             {% set ts = namespace(total=0) %}
@@ -256,7 +256,7 @@
                 {% endif %}
             {% endfor %}
 
-            <text class= 'partial-footer-total'>Total ponderado: {{ ns.total }}% 
+            <text class= 'partial-footer-total'>Total ponderado: {{ ns.total/5 }}% 
             </text>        
             <br>
             
@@ -308,7 +308,7 @@
                 {% endif %}
             {% endfor %}
 
-            <text class='partial-footer-total'>Total ponderado: {{ ns.total }}%</text>             
+            <text class='partial-footer-total'>Total ponderado: {{ ns.total/5 }}%</text>             
             <br>
 
             {% set ns = namespace(total=0) %}
